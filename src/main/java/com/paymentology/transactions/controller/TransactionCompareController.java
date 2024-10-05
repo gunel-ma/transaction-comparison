@@ -59,22 +59,21 @@ public class TransactionCompareController {
 								   @RequestParam("file2") MultipartFile file2,
 								   RedirectAttributes redirectAttributes) {
 
-		unmatchedTransactions = csvReader.compareTransactions( file1,
-				file2);
+		List<List<TransactionDTO>> comparisonResult = csvReader.compareTransactions(file1, file2);
+		unmatchedTransactions = comparisonResult.get(0);
+		unmatchedTransactions.addAll(comparisonResult.get(1));
 
-		List<TransactionDTO> firstFileTransactions = csvReader.getCsvResult(file1);
-		List<TransactionDTO> secondFileTransactions = csvReader.getCsvResult(file2);
+		List<TransactionDTO> firstFileTransactions = csvReader.parseCsv(file1);
+		List<TransactionDTO> secondFileTransactions = csvReader.parseCsv(file2);
 
-		redirectAttributes.addFlashAttribute("unmatchedCount", unmatchedTransactions.size());
 		redirectAttributes.addFlashAttribute("file1_totalCount", firstFileTransactions.size());
 		redirectAttributes.addFlashAttribute("file2_totalCount", secondFileTransactions.size());
-
-		redirectAttributes.addFlashAttribute("file1_unmatchedCount", firstFileTransactions.size()
-				- csvReader.compareTransactions( file1,
-				file2).size());
-		redirectAttributes.addFlashAttribute("file2_unmatchedCount", secondFileTransactions.size()
-				- csvReader.compareTransactions( file1,
-				file2).size());
+		redirectAttributes.addFlashAttribute("file1_matchingCount",
+				firstFileTransactions.size() - comparisonResult.get(0).size());
+		redirectAttributes.addFlashAttribute("file2_matchingCount",
+				secondFileTransactions.size() - comparisonResult.get(1).size());
+		redirectAttributes.addFlashAttribute("file1_unmatchedCount", comparisonResult.get(0).size());
+		redirectAttributes.addFlashAttribute("file2_unmatchedCount", comparisonResult.get(1).size());
 		redirectAttributes.addFlashAttribute("file1_name", file1.getOriginalFilename());
 		redirectAttributes.addFlashAttribute("file2_name", file2.getOriginalFilename());
 

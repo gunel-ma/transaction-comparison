@@ -8,8 +8,8 @@ import java.util.List;
 @Service
 public interface CsvReader {
 
-    List<TransactionDTO> getCsvResult(MultipartFile filePath);
+    List<TransactionDTO> parseCsv(MultipartFile filePath);
 
-    List<TransactionDTO> compareTransactions(MultipartFile file1, MultipartFile file2);
+    List<List<TransactionDTO>> compareTransactions(MultipartFile file1, MultipartFile file2);
 
 }

@@ -23,7 +23,7 @@ public class CsvReaderImpl implements CsvReader {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvReaderImpl.class);
 
-    public List<TransactionDTO> getCsvResult(MultipartFile filePath) {
+    public List<TransactionDTO> parseCsv(MultipartFile filePath) {
 
         List<TransactionDTO> transactionDTOs = new ArrayList<>();
 
@@ -58,14 +58,14 @@ public class CsvReaderImpl implements CsvReader {
         return transactionDTOs;
     }
 
-    public List<TransactionDTO> compareTransactions(MultipartFile file1, MultipartFile file2) {
+    public List<List<TransactionDTO>> compareTransactions(MultipartFile file1, MultipartFile file2) {
 
-        List<TransactionDTO> nonMatchingTransactions = new ArrayList<>();
-
+        List<List<TransactionDTO>> nonMatchingTransactionLists = new ArrayList<>();
+        List<TransactionDTO> firstListUnmatched = new ArrayList<>();
+        List<TransactionDTO> secondListUnmatched = new ArrayList<>();
         try {
-            List<TransactionDTO> firstList = getCsvResult(file1);
-            List<TransactionDTO> secondList = getCsvResult(file2).stream()
-                    .toList();
+            List<TransactionDTO> firstList = parseCsv(file1);
+            List<TransactionDTO> secondList = parseCsv(file2);
             List<String> firstListIDs = firstList.stream()
                     .map(TransactionDTO::getId)
                     .toList();
@@ -73,13 +73,12 @@ public class CsvReaderImpl implements CsvReader {
                     .map(TransactionDTO::getId)
                     .toList();
 
-
             firstList.stream()
                     .filter(transactionDTO -> !secondListIDs.contains(transactionDTO.getId()))
-                    .forEach(nonMatchingTransactions::add);
+                    .forEach(firstListUnmatched::add);
             secondList.stream()
                     .filter(transactionDTO -> !firstListIDs.contains(transactionDTO.getId()))
-                    .forEach(nonMatchingTransactions::add);
+                    .forEach(secondListUnmatched::add);
         }
         catch (IllegalArgumentException illegalArgumentException) {
             logger.error(illegalArgumentException.getMessage());
@@ -87,7 +86,9 @@ public class CsvReaderImpl implements CsvReader {
         catch (Exception exception) {
             logger.warn(exception.getMessage());
         }
+        nonMatchingTransactionLists.add(firstListUnmatched);
+        nonMatchingTransactionLists.add(secondListUnmatched);
 
-        return nonMatchingTransactions;
+        return nonMatchingTransactionLists;
     }
 }
