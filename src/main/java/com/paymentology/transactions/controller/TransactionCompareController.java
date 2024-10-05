@@ -57,7 +57,7 @@ public class TransactionCompareController {
 	@PostMapping("/")
 	public String handleFileUpload(@RequestParam("file1") MultipartFile file1,
 								   @RequestParam("file2") MultipartFile file2,
-								   RedirectAttributes redirectAttributes) throws IOException {
+								   RedirectAttributes redirectAttributes) {
 
 		unmatchedTransactions = csvReader.compareTransactions( file1,
 				file2);

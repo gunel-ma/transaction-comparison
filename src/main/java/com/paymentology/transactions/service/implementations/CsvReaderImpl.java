@@ -59,23 +59,34 @@ public class CsvReaderImpl implements CsvReader {
     }
 
     public List<TransactionDTO> compareTransactions(MultipartFile file1, MultipartFile file2) {
-        List<TransactionDTO> firstList = getCsvResult(file1);
-        List<TransactionDTO> secondList = getCsvResult(file2).stream()
-                                                        .toList();
-        List<String> firstListIDs = firstList.stream()
-                                                .map(TransactionDTO::getId)
-                                                .toList();
-        List<String> secondListIDs = secondList.stream()
-                                                .map(TransactionDTO::getId)
-                                                .toList();
+
         List<TransactionDTO> nonMatchingTransactions = new ArrayList<>();
 
-        firstList.stream()
-                .filter(transactionDTO -> !secondListIDs.contains(transactionDTO.getId()))
-                .forEach(nonMatchingTransactions::add);
-        secondList.stream()
-                .filter(transactionDTO -> !firstListIDs.contains(transactionDTO.getId()))
-                .forEach(nonMatchingTransactions::add);
+        try {
+            List<TransactionDTO> firstList = getCsvResult(file1);
+            List<TransactionDTO> secondList = getCsvResult(file2).stream()
+                    .toList();
+            List<String> firstListIDs = firstList.stream()
+                    .map(TransactionDTO::getId)
+                    .toList();
+            List<String> secondListIDs = secondList.stream()
+                    .map(TransactionDTO::getId)
+                    .toList();
+
+
+            firstList.stream()
+                    .filter(transactionDTO -> !secondListIDs.contains(transactionDTO.getId()))
+                    .forEach(nonMatchingTransactions::add);
+            secondList.stream()
+                    .filter(transactionDTO -> !firstListIDs.contains(transactionDTO.getId()))
+                    .forEach(nonMatchingTransactions::add);
+        }
+        catch (IllegalArgumentException illegalArgumentException) {
+            logger.error(illegalArgumentException.getMessage());
+        }
+        catch (Exception exception) {
+            logger.warn(exception.getMessage());
+        }
 
         return nonMatchingTransactions;
     }

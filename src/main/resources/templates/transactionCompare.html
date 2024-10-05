@@ -41,6 +41,19 @@
           background-color: #f2f2f2;
         }
 
+        .comparison {
+            margin-left: 40%;
+            margin-bottom: 1%;
+            font-weight: 900;
+        }
+
+        .buttonCompare {
+            width : 150px;
+            height: 30px;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
         .formReport {
           display: flex;
           justify-content: center;
@@ -50,8 +63,9 @@
         .buttonReport {
             margin-top : 30px;
             width : 200px;
-            height: 50px;
+            height: 35px;
             font-size: 15px;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -63,11 +77,15 @@
             <tr><td>Select file 1 :         </td><td><input type="file" name="file1" /></td></tr>
             <tr><td>Select file 2 :         </td><td><input type="file" name="file2" /></td></tr>
 
-            <tr><td></td><td><input type="submit" value="Compare" /></td></tr>
+            <tr><td></td><td><input class = "buttonCompare" type="submit" value="Compare" /></td></tr>
         </table>
     </form>
 </div>
 
+
+<div class="comparison">
+    Comparison Results
+</div>
 <div class="row" >
     <div class="row">
                 <table class="column">
