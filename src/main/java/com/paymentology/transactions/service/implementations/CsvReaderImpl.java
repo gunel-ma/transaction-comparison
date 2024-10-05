@@ -46,10 +46,9 @@ public class CsvReaderImpl implements CsvReader {
                                                     transactionDTOs.add(transactionDTO);
                                 }
                                 catch (Exception e) {
-                                    logger.error("Parsing exception occurred : " + e.getMessage());
+                                    logger.warn("Parsing exception occurred : " + e.getMessage());
 
                                 }
-
                             });
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -60,35 +59,41 @@ public class CsvReaderImpl implements CsvReader {
 
     public List<List<TransactionDTO>> compareTransactions(MultipartFile file1, MultipartFile file2) {
 
-        List<List<TransactionDTO>> nonMatchingTransactionLists = new ArrayList<>();
-        List<TransactionDTO> firstListUnmatched = new ArrayList<>();
-        List<TransactionDTO> secondListUnmatched = new ArrayList<>();
+        List<List<TransactionDTO>> nonMatchingTransactionsLists = new ArrayList<>();
+        List<TransactionDTO> firstUnmatchedList = new ArrayList<>();
+        List<TransactionDTO> secondUnmatchedList = new ArrayList<>();
         try {
             List<TransactionDTO> firstList = parseCsv(file1);
             List<TransactionDTO> secondList = parseCsv(file2);
-            List<String> firstListIDs = firstList.stream()
-                    .map(TransactionDTO::getId)
-                    .toList();
-            List<String> secondListIDs = secondList.stream()
-                    .map(TransactionDTO::getId)
-                    .toList();
 
             firstList.stream()
-                    .filter(transactionDTO -> !secondListIDs.contains(transactionDTO.getId()))
-                    .forEach(firstListUnmatched::add);
+                    .filter(transactionDTO -> secondList.stream()
+                            .noneMatch(secondListTransaction ->
+                                    secondListTransaction.getId().equals(transactionDTO.getId())))
+                    .filter(transactionDTO -> secondList.stream()
+                            .noneMatch(secondListTransaction ->
+                                    secondListTransaction.getDate().equals(transactionDTO.getDate()) &&
+                                    secondListTransaction.getAmount().equals(transactionDTO.getAmount()) &&
+                                    secondListTransaction.getWalletReference().equals(transactionDTO.getWalletReference())))
+                    .forEach(firstUnmatchedList::add);
+
             secondList.stream()
-                    .filter(transactionDTO -> !firstListIDs.contains(transactionDTO.getId()))
-                    .forEach(secondListUnmatched::add);
-        }
-        catch (IllegalArgumentException illegalArgumentException) {
-            logger.error(illegalArgumentException.getMessage());
+                    .filter(transactionDTO -> firstList.stream()
+                            .noneMatch(firstTransaction ->
+                                    firstTransaction.getId().equals(transactionDTO.getId())))
+                    .filter(transactionDTO -> firstList.stream()
+                            .noneMatch(firstTransaction ->
+                                    firstTransaction.getDate().equals(transactionDTO.getDate()) &&
+                                    firstTransaction.getAmount().equals(transactionDTO.getAmount()) &&
+                                    firstTransaction.getWalletReference().equals(transactionDTO.getWalletReference())))
+                    .forEach(secondUnmatchedList::add);
         }
         catch (Exception exception) {
-            logger.warn(exception.getMessage());
+            logger.error(exception.getMessage());
         }
-        nonMatchingTransactionLists.add(firstListUnmatched);
-        nonMatchingTransactionLists.add(secondListUnmatched);
+        nonMatchingTransactionsLists.add(firstUnmatchedList);
+        nonMatchingTransactionsLists.add(secondUnmatchedList);
 
-        return nonMatchingTransactionLists;
+        return nonMatchingTransactionsLists;
     }
 }
