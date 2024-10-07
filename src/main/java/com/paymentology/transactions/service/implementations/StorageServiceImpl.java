@@ -1,6 +1,8 @@
 package com.paymentology.transactions.service.implementations;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -30,11 +32,17 @@ public class StorageServiceImpl implements StorageService {
         this.rootLocation = Paths.get(properties.getLocation());
     }
 
+    /*
+    * Function returns (uploads) given file with the filename
+     */
     @Override
     public Path load(String filename) {
         return rootLocation.resolve(filename);
     }
 
+    /*
+    * Function returns file as a Resource instance
+     */
     @Override
     public Resource loadAsResource(String filename) {
         try {
@@ -54,5 +62,14 @@ public class StorageServiceImpl implements StorageService {
         }
     }
 
+    @Override
+    public void init() {
+        try {
+            Files.createDirectories(rootLocation);
+        }
+        catch (IOException e) {
+            throw new FileStorageException("Could not initialize storage", e);
+        }
+    }
 }
 

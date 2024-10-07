@@ -6,6 +6,7 @@ import java.util.List;
 import com.paymentology.transactions.model.TransactionDTO;
 import com.paymentology.transactions.service.CsvReader;
 import com.paymentology.transactions.utils.CsvGeneratorUtil;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -35,25 +36,19 @@ public class TransactionCompareController {
 
 	List<TransactionDTO> unmatchedTransactions = new ArrayList<>();
 
-
+	/*
+	* Returns transactionCompare.html from the resources/templates folder
+	 */
 	@GetMapping("/")
 	public String listUploadedFiles(Model model) {
 		return "transactionCompare";
 	}
 
-	@GetMapping("/files/{filename:.+}")
-	@ResponseBody
-	public ResponseEntity<Resource> serveFile(@PathVariable String filename) {
-
-		Resource file = storageService.loadAsResource(filename);
-
-		if (file == null)
-			return ResponseEntity.notFound().build();
-
-		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-				"attachment; filename=\"" + file.getFilename() + "\"").body(file);
-	}
-
+	/*
+	*  Uploads given two files, compares transactions between them and
+	*  passes some statistics (number of total transactions, non-matching transactions,
+	*  matching transactions, file names) to the html page: resources/templates/transactionCompare.html
+	 */
 	@PostMapping("/")
 	public String handleFileUpload(@RequestParam("file1") MultipartFile file1,
 								   @RequestParam("file2") MultipartFile file2,
@@ -63,9 +58,11 @@ public class TransactionCompareController {
 		unmatchedTransactions = comparisonResult.get(0);
 		unmatchedTransactions.addAll(comparisonResult.get(1));
 
+		// calling parseCsv() function to get the statistics of matching transactions
 		List<TransactionDTO> firstFileTransactions = csvReader.parseCsv(file1);
 		List<TransactionDTO> secondFileTransactions = csvReader.parseCsv(file2);
 
+		// Passing values to the html page
 		redirectAttributes.addFlashAttribute("file1_totalCount", firstFileTransactions.size());
 		redirectAttributes.addFlashAttribute("file2_totalCount", secondFileTransactions.size());
 		redirectAttributes.addFlashAttribute("file1_matchingCount",
@@ -76,19 +73,20 @@ public class TransactionCompareController {
 		redirectAttributes.addFlashAttribute("file2_unmatchedCount", comparisonResult.get(1).size());
 		redirectAttributes.addFlashAttribute("file1_name", file1.getOriginalFilename());
 		redirectAttributes.addFlashAttribute("file2_name", file2.getOriginalFilename());
-
 		return "redirect:/";
 	}
 
+	/*
+	* This endpoint is used in the html page to download csv
+	*  file containing non-matching transactions from both files
+	 */
 	@GetMapping("/files/csv")
 	public ResponseEntity<byte[]> generateCsvFromUnmatchedTransactions() {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
 		headers.setContentDispositionFormData("attachment", "unmatchedReport.csv");
-
 		byte[] csvBytes = csvGeneratorUtil.generateCsv(unmatchedTransactions).getBytes();
-
 		return new ResponseEntity<>(csvBytes, headers, HttpStatus.OK);
 	}
 
@@ -96,5 +94,4 @@ public class TransactionCompareController {
 	public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
 		return ResponseEntity.notFound().build();
 	}
-
 }

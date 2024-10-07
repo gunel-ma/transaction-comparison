@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.paymentology.transactions.utils.Constants.COMMA;
+import static com.paymentology.transactions.utils.Constants.PARSING_ERROR_MESSAGE;
 
 @Service
 @AllArgsConstructor
@@ -23,6 +24,10 @@ public class CsvReaderImpl implements CsvReader {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvReaderImpl.class);
 
+    /*
+    * Function to parse un uploaded file and
+    * map the content of the file to a TransactionDTO objects
+     */
     public List<TransactionDTO> parseCsv(MultipartFile filePath) {
 
         List<TransactionDTO> transactionDTOs = new ArrayList<>();
@@ -31,6 +36,7 @@ public class CsvReaderImpl implements CsvReader {
             InputStream inputStream = filePath.getInputStream();
                     new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
                             .lines()
+                            // mapping each line to a TransactionDTO object
                                 .forEach(line -> {
                                                 TransactionDTO transactionDTO = new TransactionDTO();
                                                 String[] values = line.split(COMMA);
@@ -46,7 +52,7 @@ public class CsvReaderImpl implements CsvReader {
                                                     transactionDTOs.add(transactionDTO);
                                 }
                                 catch (Exception e) {
-                                    logger.warn("Parsing exception occurred : " + e.getMessage());
+                                    logger.warn(PARSING_ERROR_MESSAGE + e.getMessage());
 
                                 }
                             });
@@ -57,6 +63,13 @@ public class CsvReaderImpl implements CsvReader {
         return transactionDTOs;
     }
 
+    /*
+    * Funtion to compare transactions between uploaded
+    * two files, i.e., MultipartFile objects.
+    * Return value of this method a list of two lists.
+    * Each list contains non-matching transactions in
+    * the first and second files respectively.
+     */
     public List<List<TransactionDTO>> compareTransactions(MultipartFile file1, MultipartFile file2) {
 
         List<List<TransactionDTO>> nonMatchingTransactionsLists = new ArrayList<>();
@@ -65,7 +78,7 @@ public class CsvReaderImpl implements CsvReader {
         try {
             List<TransactionDTO> firstList = parseCsv(file1);
             List<TransactionDTO> secondList = parseCsv(file2);
-
+            // filtering transactions contained in the first file to keep only non-matching ones in the second file
             firstList.stream()
                     .filter(transactionDTO -> secondList.stream()
                             .noneMatch(secondListTransaction ->
@@ -77,6 +90,7 @@ public class CsvReaderImpl implements CsvReader {
                                     secondListTransaction.getWalletReference().equals(transactionDTO.getWalletReference())))
                     .forEach(firstUnmatchedList::add);
 
+            // filtering transactions contained in the second file to keep only non-matching ones in the first file
             secondList.stream()
                     .filter(transactionDTO -> firstList.stream()
                             .noneMatch(firstTransaction ->
@@ -91,6 +105,7 @@ public class CsvReaderImpl implements CsvReader {
         catch (Exception exception) {
             logger.error(exception.getMessage());
         }
+        // combining two lists of non-matching transactions in a list to be returned by the method
         nonMatchingTransactionsLists.add(firstUnmatchedList);
         nonMatchingTransactionsLists.add(secondUnmatchedList);
 

@@ -12,6 +12,10 @@ public class CsvGeneratorUtil {
     private static final String CSV_HEADER = "Transaction ID,Profile Name,Transaction Date,Transaction Amount,Narrative,Description," +
             "Transaction type,Wallet Reference\n";
 
+    /*
+    *  Function generates a csv file from the given list of
+    *  TransactionDTO objects
+     */
     public String generateCsv(List<TransactionDTO> transactionDTOs) {
         StringBuilder csvContent = new StringBuilder();
         csvContent.append(CSV_HEADER);
