@@ -1,14 +1,11 @@
 package com.paymentology.transactions;
 
 import com.paymentology.transactions.model.TransactionDTO;
-import com.paymentology.transactions.service.CsvReader;
-import com.paymentology.transactions.service.implementations.CsvReaderImpl;
+import com.paymentology.transactions.service.implementations.CsvReaderServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class CsvReaderImplTest {
 
     @InjectMocks
-    private CsvReaderImpl csvReader;
+    private CsvReaderServiceImpl csvReader;
 
     ClassPathResource resourceFile1 = new ClassPathResource("37777aa6-fae8-48cb-aa8b-55220d03cab2.csv");
     ClassPathResource resourceFile2 = new ClassPathResource("b1bfec9a-34bf-490a-8edc-caac0660a4eb.csv");

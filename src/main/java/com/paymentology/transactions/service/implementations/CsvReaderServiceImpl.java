@@ -1,7 +1,7 @@
 package com.paymentology.transactions.service.implementations;
 
 import com.paymentology.transactions.model.TransactionDTO;
-import com.paymentology.transactions.service.CsvReader;
+import com.paymentology.transactions.service.CsvReaderService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -20,9 +20,9 @@ import static com.paymentology.transactions.utils.Constants.PARSING_ERROR_MESSAG
 @Service
 @AllArgsConstructor
 @Slf4j
-public class CsvReaderImpl implements CsvReader {
+public class CsvReaderServiceImpl implements CsvReaderService {
 
-    private static final Logger logger = LoggerFactory.getLogger(CsvReaderImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(CsvReaderServiceImpl.class);
 
     /*
     * Function to parse un uploaded file and

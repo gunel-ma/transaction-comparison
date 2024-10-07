@@ -6,7 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @Service
-public interface CsvReader {
+public interface CsvReaderService {
 
     List<TransactionDTO> parseCsv(MultipartFile filePath);
 
